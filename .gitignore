@@ -1,0 +1,5 @@
+*~
+*.exe
+*.gb
+/Resources/
+/cpu_instrs/
