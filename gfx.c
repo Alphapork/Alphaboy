@@ -157,11 +157,11 @@ void renderTiles(gameBoy *gb) {
       //in the tile
       int colourNum = bitGetVal(data2, colourBit);
       colourNum <<= 1;
-      colourNum |= bitGetVal(data1, colourBit); //TODO
+      colourNum |= bitGetVal(data1, colourBit); 
 
       //now we have the colour id get the actual
       //colour from palette 0xFF47
-      COLOUR col = getColour(colourNum, 0xFF47, gb); //TODO
+      COLOUR col = getColour(colourNum, 0xFF47, gb); 
       int red = 0;
       int green = 0;
       int blue = 0;
@@ -290,7 +290,7 @@ void drawScanline(gameBoy *gb) {
   }
 
   if (testBit(control,1)) {
-    //renderSprites(gb);  //TODO
+    renderSprites(gb);
   }
 }
 

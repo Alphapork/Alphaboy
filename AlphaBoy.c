@@ -44,12 +44,12 @@ int main(int argc, char const *argv[]) {
   
        while ( cyclesThisFrame < MAXCYCLES) {
   
-	 // int opCycles = performInstruction(&alphaBoy);
+	 int opCycles = performInstruction(&alphaBoy);
   
-	 // cyclesThisFrame += opCycles;
-         //checkTimers(opCycles,&alphaBoy);
-         //updateGfx(opCycles, &alphaBoy);
-         //doInterupts(&alphaBoy);
+	 cyclesThisFrame += opCycles;
+         checkTimers(opCycles,&alphaBoy);
+         updateGfx(opCycles, &alphaBoy);
+         doInterupts(&alphaBoy);
        }
   
   
