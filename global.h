@@ -1,7 +1,7 @@
 #ifndef GLOBAL_HEADER
 #define GLOBAL_HEADER
 
-#define CLOCKSPEED 4194304 //move to global.h
+#define CLOCKSPEED 4194304 
 #define TIMA 0xFF05
 #define TMA 0xFF06
 #define TMC 0xFF07
@@ -11,5 +11,7 @@ typedef unsigned char BYTE ;
 typedef char SIGNED_BYTE ;
 typedef unsigned short WORD;
 typedef short SIGNED_WORD;
+
+typedef enum COLOUR { WHITE,LIGHT,DARK,BLACK } COLOUR;
 
 #endif

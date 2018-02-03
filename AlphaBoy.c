@@ -5,13 +5,7 @@
 #include "AlphaBoy.h"
 #include "helper.h"
 #include "CPU_LR35902.h"
-
-/* #define CLOCKSPEED 4194304 */
-/* #define  MAXCYCLES 69905 */
-/* #define TIMA 0xFF05 */
-/* #define TMA 0xFF06 */
-/* #define TMC 0xFF07 */
-
+#include "gfx.h"
 
 
 
@@ -44,23 +38,23 @@ int main(int argc, char const *argv[]) {
   }
 
 
-  // while(gbRunning) {
-  //
-  //   int cyclesThisFrame = 0;
-  //
-  //     while ( cyclesThisFrame < MAXCYCLES) {
-  //
-  //       int opCycles = performInstruction(&alphaBoy);
-  //
-  //       cyclesThisFrame += opCycles;
-  //       checkTimers(opCycles, alphaBoy);
-  //       updateGfx(opCycles, alphaBoy);
-  //       doInterupts(alphaBoy);
-  //     }
-  //
-  //
-  //
-  // }
+   while(alphaBoy.gbRunning) {
+  
+     int cyclesThisFrame = 0;
+  
+       while ( cyclesThisFrame < MAXCYCLES) {
+  
+	 // int opCycles = performInstruction(&alphaBoy);
+  
+	 // cyclesThisFrame += opCycles;
+         //checkTimers(opCycles,&alphaBoy);
+         //updateGfx(opCycles, &alphaBoy);
+         //doInterupts(&alphaBoy);
+       }
+  
+  
+  
+   }
 
   free(m_cartridge);
   free(alphaBoy.m_rom);

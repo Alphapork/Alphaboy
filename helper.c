@@ -310,6 +310,12 @@ void setLCDStatus(gameBoy *gb) {
   
 }
 
+int bitGetVal(BYTE targetByte, int targetBit) {
+  if (testBit(targetByte, targetBit))
+    return 1;
+  else
+    return 0;
+}
 
 
 
@@ -317,119 +323,5 @@ void doDMATransfer(BYTE data, gameBoy *gb) {
   WORD address = data << 8;
   for (int i = 0; i < 0xA0; i++) {
     writeMemory(0xFE00 + i, readMemory(gb->m_rom, address + i), gb);
-  }
-}
-
-void renderTiles(gameBoy *gb) {
-  WORD tileData = 0;
-  WORD backgroundMemory = 0;
-  bool unsig = true;
-
-  //where to draw the visual area and the window
-  BYTE scrollY = readMemory(gb->m_rom, 0xFF42);
-  BYTE scrollX = readMemory(gb->m_rom, 0xFF43);
-  BYTE windowY = readMemory(gb->m_rom, 0xFF4A);
-  BYTE windowX = readMemory(gb->m_rom, 0xFF4B) - 7;
-  BYTE lcdControl = readMemory(gb->m_rom, 0xFF40);
-  bool usingWindow = false;
-
-  //is the window enabled?
-  if (testBit(lcdControl,4) {
-      //is the current scanline we're drawing
-      //within the windows Y pos?
-      if (windowY <= readMemory(gb->m_rom, 0xFF44) ) {	
-	usingWindow = true;
-      }
-
-    }
-
-    //which tile data are we using?
-    if (testBit(lcdControl,4)) {
-      tileData = 0x8000;
-    }
-
-    else {
-      //IMPORTANT: this memory region uses signed
-      //bytes as tile identifiers
-      tileData = 0x8800;
-      unsig = false;
-    }
-
-    //which background mem?
-    if (usingWindow == false) {
-      if (testBit(lcdControl,3)) {
-	backgroundMemory = 0x9C00;
-      }
-      else {
-	backgroundMemory = 0x9800;
-      }
-    }
-
-    else {
-      //which window memory?
-      if (testBit(lcdControl,6)) {
-	backgroundMemory = 0x9C00;
-      }
-      else {
-	backgroundMemory = 0x9800;
-      }
-    }
-
-    BYTE yPos = 0;
-
-    //yPos is used to calculate which of 32 vertical tiles the
-    //current scanline is drawing
-
-    if (!usingWindow)
-      yPos = scrollY + readMemory(gb->m_rom, 0xFF44);
-    else
-      yPos = readMemory(gb->m_rom, 0xFF44) - windowY;
-
-
-    //which of the 8 vertical pixels of the current
-    //tile is the scanline on?
-    WORD tileRow = (((BYTE)(yPos/8)) *32);//TODO
-
-    
-}
-
-void drawScanline(gameBoy *gb) {
-  BYTE control = readMemory(gb->m_rom, 0xFF40);
-  if (testBit(control,0)) {
-    //renderTiles(gb);  //TODO
-  }
-
-  if (testBit(control,1)) {
-    //renderSprites(gb);  //TODO
-  }
-}
-
-
-
-
-void updateGfx(int cycles, gameBoy *gb) {
-  setLCDStatus(gb);
-
-  if (isLCDEnabled(gb)) { 
-    gb->scanlineCounter -= cycles;
-  } else return;
-
-  if (gb->scanlineCounter <= 0) {
-    gb->m_rom[0xFF44]++;
-    BYTE currentScanline = readMemory(gb->m_rom, 0xFF44);
-
-    gb->scanlineCounter = 456;
-
-    if (currentScanline == 144) {
-      requestInterupt(0, gb);
-    }
-
-    else if (currentScanline > 153) {
-      gb->m_rom[0xFF44] = 0x00;
-    }
-
-    else if (currentScanline < 144) {
-      drawScanline(gb);
-    }
   }
 }

@@ -34,7 +34,15 @@ bool isLCDEnabled();
 
 void setLCDStatus();
 
-void doDMATransfer(BYTE date, gameBoy *gb);
+int bitGetVal(BYTE targetByte, int targetBit);
+
+COLOUR getColour(BYTE colourNum, WORD address, gameBoy *gb);
+
+void doDMATransfer(BYTE data, gameBoy *gb);
+
+void renderTiles(gameBoy *gb);
+
+void renderSprites(gameBoy *gb);
 
 void drawScanline(gameBoy *gb);
 
