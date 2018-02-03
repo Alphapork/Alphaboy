@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include "helper.h"
 #include "global.h"
 
@@ -17,14 +18,18 @@ void initGameBoy(gameBoy *gb) {
   gb->m_rom = calloc (0x10000, sizeof(BYTE));
   gb->gbRunning = true;
   gb->masterAllowInterupt = true;
-  gb->CPU.regA = 0x01;
-  gb->CPU.regF = 0xB0;
-  gb->CPU.regB = 0x00;
-  gb->CPU.regC = 0x13;
-  gb->CPU.regD = 0x00;
-  gb->CPU.regE = 0xD8;
-  gb->CPU.regH = 0x01;
-  gb->CPU.regL = 0x4D;
+  gb->CPU.running = true;
+  gb->CPU.interupts_enabled = true;
+  gb->CPU.reg_A = 0x01;
+  gb->CPU.reg_flagbyte = 0xB0;
+  gb->CPU.reg_B = 0x00;
+  gb->CPU.reg_C = 0x13;
+  gb->CPU.reg_D = 0x00;
+  gb->CPU.reg_E = 0xD8;
+  gb->CPU.reg_H = 0x01;
+  gb->CPU.reg_L = 0x4D;
+  gb->CPU.SP = 0x0000;
+  gb->CPU.PC = 0x0000;
   gb->m_rom[0xFF05] = 0x00;
   gb->m_rom[0xFF06] = 0x00;
   gb->m_rom[0xFF07] = 0x00;

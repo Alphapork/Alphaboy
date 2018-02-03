@@ -290,7 +290,7 @@ void drawScanline(gameBoy *gb) {
   }
 
   if (testBit(control,1)) {
-    //renderSprites(gb);  //TODO
+    renderSprites(gb);  //TODO
   }
 }
 

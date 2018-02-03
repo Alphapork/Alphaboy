@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdint.h>
-#include "8080_core_SDL.h"
+#include "8080_core.h"
 #include <stdbool.h>
 
 void init_cpu(e8080_cpu *CPU) {

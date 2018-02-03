@@ -1,5 +1,6 @@
 #ifndef _8080_CORE_SDL
 #define _8080_CORE_SDL
+#include <stdbool.h>
 
 
 typedef struct e8080_cpu
@@ -40,4 +41,13 @@ typedef struct e8080_cpu
 
 
 }e8080_cpu;
+
+void init_cpu(e8080_cpu *CPU);
+
+void e8080_interrupt_cpu(e8080_cpu *CPU, uint8_t *Memory, int rst_nr);
+
+void setflags(uint8_t flag_picker, uint8_t operand_1, char operator, uint8_t operand_2, e8080_cpu *CPU);
+
+int e8080_perform_instruction(e8080_cpu *CPU, uint8_t *Memory, int nr_of_cycles);
+
 #endif
