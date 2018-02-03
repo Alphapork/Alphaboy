@@ -26,7 +26,9 @@ typedef struct gbCPU {
 
 } gbCPU;
 
-
+int performInstruction(gameBoy *gb);
+int performExtendedOp(gameBoy *gb);
+int performOp(gameBoy *gb);
 
 
 
