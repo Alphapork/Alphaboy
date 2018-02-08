@@ -1,7 +1,8 @@
 #ifndef GLOBAL_HEADER
 #define GLOBAL_HEADER
+#include <stdbool.h>
 
-#define CLOCKSPEED 4194304 
+#define CLOCKSPEED 4194304
 #define TIMA 0xFF05
 #define TMA 0xFF06
 #define TMC 0xFF07
@@ -13,5 +14,47 @@ typedef unsigned short WORD;
 typedef short SIGNED_WORD;
 
 typedef enum COLOUR { WHITE,LIGHT,DARK,BLACK } COLOUR;
+
+typedef struct gbCPU {
+
+  BYTE regA;
+  BYTE regF;
+  BYTE regB;
+  BYTE regC;
+  BYTE regD;
+  BYTE regE;
+  BYTE regH;
+  BYTE regL;
+
+
+
+  BYTE addSubFlag;
+  BYTE zeroFlag;
+  BYTE halfCarryFlag;
+  BYTE carryFlag;
+
+  WORD SP;
+  WORD PC;
+
+
+} gbCPU;
+
+typedef struct gameBoy {
+  BYTE *m_rom;
+  gbCPU CPU;
+  bool gbRunning;
+  bool masterAllowInterupt;
+  BYTE screenData[160][144][3];
+  int timerCount;
+  int timerStartValue;
+  int dividerRegister;
+  int scanlineCounter;
+} gameBoy;
+
+
+
+
+
+
 
 #endif

@@ -1,10 +1,12 @@
 #include <stdio.h>
+#include <stdbool.h>
 #include "global.h"
 #include "CPU_LR35902.h"
 #include "OPCODES.h"
 
+
 WORD getDoubleRegister(BYTE reg1, BYTE reg2) {
-  return ( (reg1 << 8) |= reg2 );
+  return ( (reg1 << 8) | reg2 );
 }
 
 
@@ -43,17 +45,20 @@ int performOp(gameBoy *gb) {
     case 0x7B:  eightBitLoad(&(gb->CPU.regA), gb->CPU.regE); return 4;
     case 0x7C:  eightBitLoad(&(gb->CPU.regA), gb->CPU.regH); return 4;
     case 0x7D:  eightBitLoad(&(gb->CPU.regA), gb->CPU.regL); return 4;
-    case 0x7E:  eightBitLoad(&(gb->CPU.regA), gb->CPU.m_rom[getDoubleRegister(gb->CPU.regH, gb->CPU.regL)]); return 8;
+    case 0x7E:  eightBitLoad(&(gb->CPU.regA), gb->m_rom[getDoubleRegister(gb->CPU.regH, gb->CPU.regL)]); return 8;
     //copy value from register to B
-    case 0x7F:  eightBitLoad(&(gb->CPU.regB), gb->CPU.regA); return 4;
-    case 0x78:  eightBitLoad(&(gb->CPU.regB), gb->CPU.regB); return 4;
-    case 0x79:  eightBitLoad(&(gb->CPU.regB), gb->CPU.regC); return 4;
-    case 0x7A:  eightBitLoad(&(gb->CPU.regB), gb->CPU.regD); return 4;
-    case 0x7B:  eightBitLoad(&(gb->CPU.regB), gb->CPU.regE); return 4;
-    case 0x7C:  eightBitLoad(&(gb->CPU.regB), gb->CPU.regH); return 4;
-    case 0x7D:  eightBitLoad(&(gb->CPU.regB), gb->CPU.regL); return 4;
-    case 0x7E:  eightBitLoad(&(gb->CPU.regB), gb->CPU.m_rom[getDoubleRegister(gb->CPU.regH, gb->CPU.regL)]); return 8;
+    case 0x40:  eightBitLoad(&(gb->CPU.regB), gb->CPU.regB); return 4;
+    case 0x41:  eightBitLoad(&(gb->CPU.regB), gb->CPU.regC); return 4;
+    case 0x42:  eightBitLoad(&(gb->CPU.regB), gb->CPU.regD); return 4;
+    case 0x43:  eightBitLoad(&(gb->CPU.regB), gb->CPU.regE); return 4;
+    case 0x44:  eightBitLoad(&(gb->CPU.regB), gb->CPU.regH); return 4;
+    case 0x45:  eightBitLoad(&(gb->CPU.regB), gb->CPU.regL); return 4;
+    case 0x46:  eightBitLoad(&(gb->CPU.regB), gb->m_rom[getDoubleRegister(gb->CPU.regH, gb->CPU.regL)]); return 8;
 
 
   }
+}
+
+int performExtendedOp(gameBoy *gb) {
+  
 }
