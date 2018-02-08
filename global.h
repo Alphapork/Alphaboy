@@ -40,15 +40,20 @@ typedef struct gbCPU {
 } gbCPU;
 
 typedef struct gameBoy {
-  BYTE *m_rom;
+
   gbCPU CPU;
   bool gbRunning;
   bool masterAllowInterupt;
+  bool MBC1;
+  bool MBC2;
+  BYTE currentRomBank;
   BYTE screenData[160][144][3];
   int timerCount;
   int timerStartValue;
   int dividerRegister;
   int scanlineCounter;
+  BYTE *m_rom;
+  BYTE *m_cartridge;
 } gameBoy;
 
 

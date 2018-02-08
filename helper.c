@@ -17,6 +17,9 @@ void initGameBoy(gameBoy *gb) {
   gb->m_rom = calloc (0x10000, sizeof(BYTE));
   gb->gbRunning = true;
   gb->masterAllowInterupt = true;
+  gb->MBC1 = false;
+  gb->MBC2 = false;
+  gb->currentRomBank = 1;
   gb->CPU.regA = 0x01;
   gb->CPU.regF = 0xB0;
   gb->CPU.regB = 0x00;
@@ -25,6 +28,8 @@ void initGameBoy(gameBoy *gb) {
   gb->CPU.regE = 0xD8;
   gb->CPU.regH = 0x01;
   gb->CPU.regL = 0x4D;
+  gb->CPU.PC = 0x100;
+  gb->CPU.SP = 0xFFFE;
   gb->m_rom[0xFF05] = 0x00;
   gb->m_rom[0xFF06] = 0x00;
   gb->m_rom[0xFF07] = 0x00;
@@ -224,12 +229,12 @@ bool isLCDEnabled(gameBoy *gb) {
 
 
 void setLCDStatus(gameBoy *gb) {
-  
+
   BYTE status = readMemory(gb->m_rom, 0xFF41);
   if (!isLCDEnabled(gb)) {
-    
-    
-    
+
+
+
     //set the mode to 1 during lcd disabled and reset scanlineCounter
     gb->scanlineCounter = 456;
     gb->m_rom[0xFF44] = 0;
@@ -237,13 +242,13 @@ void setLCDStatus(gameBoy *gb) {
     status = bitSet(status, 0);
     writeMemory(0xFF41, status, gb);
     return;
-    
+
   }
 
-  
+
   BYTE currentline = readMemory(gb->m_rom, 0xFF44);
   BYTE currentmode = status & 0x3;
-  
+
   BYTE mode = 0;
   bool reqInterupt = false;
 
@@ -299,7 +304,7 @@ void setLCDStatus(gameBoy *gb) {
   if (readMemory(gb->m_rom, 0xFF44) == readMemory(gb->m_rom, 0xFF45)) {
     status = bitSet(status, 2);
 
-    if ( testBit(status, 6) ) 
+    if ( testBit(status, 6) )
       requestInterupt(1,gb);
 
   } else {
@@ -307,7 +312,7 @@ void setLCDStatus(gameBoy *gb) {
   }
 
   writeMemory(0xFF41,status,gb);
-  
+
 }
 
 int bitGetVal(BYTE targetByte, int targetBit) {
@@ -323,5 +328,17 @@ void doDMATransfer(BYTE data, gameBoy *gb) {
   WORD address = data << 8;
   for (int i = 0; i < 0xA0; i++) {
     writeMemory(0xFE00 + i, readMemory(gb->m_rom, address + i), gb);
+  }
+}
+
+
+void checkMBC(gameBoy *gb) {
+  switch (gb->m_cartridge[0x147]) {
+    case 1: gb->MBC1 = true; break;
+    case 2: gb->MBC1 = true; break;
+    case 3: gb->MBC1 = true; break;
+    case 5: gb->MBC2 = true; break;
+    case 6: gb->MBC2 = true; break;
+    default: break;
   }
 }

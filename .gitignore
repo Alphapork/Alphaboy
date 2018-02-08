@@ -1,5 +1,6 @@
 *~
 *.exe
 *.gb
+*.bak
 /Resources/
 /cpu_instrs/
