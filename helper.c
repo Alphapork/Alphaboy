@@ -20,6 +20,7 @@ void initGameBoy(gameBoy *gb) {
   gb->MBC1 = false;
   gb->MBC2 = false;
   gb->currentRomBank = 1;
+  gb->currentRAMBank = 0;
   gb->CPU.regA = 0x01;
   gb->CPU.regF = 0xB0;
   gb->CPU.regB = 0x00;
@@ -126,12 +127,12 @@ bool testBit(BYTE byteToTest, int bitNumber){
   return((byteToTest >> bitNumber) & 0x01 == 0x01);
 }
 
-BYTE readMemory(BYTE *memoryToReadFrom, WORD addressToRead) {
-  return memoryToReadFrom[addressToRead];
+BYTE readMemory(gameBoy *gb, WORD addressToRead) {
+  return gb->m_rom[addressToRead];
 }
 
 bool isClockEnabled(gameBoy *gb) {
-  return testBit(readMemory(gb->m_rom, TMC), 2);
+  return testBit(readMemory(gb, TMC), 2);
 }
 
 void checkTimers(int cycles, gameBoy *gb) {
@@ -153,13 +154,13 @@ void checkTimers(int cycles, gameBoy *gb) {
     if (gb->timerCount <= 0) {
       gb->timerCount = gb->timerStartValue;
 
-      if (readMemory(gb->m_rom, TIMA) == 0xFF) {
-        writeMemory(TIMA, readMemory(gb->m_rom, TMA), gb);
+      if (readMemory(gb, TIMA) == 0xFF) {
+        writeMemory(TIMA, readMemory(gb, TMA), gb);
         requestInterupt(2, gb);
       }
 
       else {
-        writeMemory(TIMA, readMemory(gb->m_rom, TIMA) + 0x01, gb);
+        writeMemory(TIMA, readMemory(gb, TIMA) + 0x01, gb);
       }
     }
 
@@ -179,7 +180,7 @@ BYTE bitReset(BYTE targetByte, int targetBit) {
 }
 
 void requestInterupt(int idBit, gameBoy *gb) {
-  BYTE request = readMemory(gb->m_rom, 0xFF0F);
+  BYTE request = readMemory(gb, 0xFF0F);
   request = bitSet(request, idBit);
   writeMemory(0xFF0F,request, gb);
 }
@@ -187,7 +188,7 @@ void requestInterupt(int idBit, gameBoy *gb) {
 
 void serviceInterupt(int interupt, gameBoy *gb) {
   gb->masterAllowInterupt = false;
-  BYTE request = readMemory(gb->m_rom, 0xFF0F);
+  BYTE request = readMemory(gb, 0xFF0F);
   request = bitReset(request, interupt);
   writeMemory(0xFF0F,request, gb);
 
@@ -207,8 +208,8 @@ void serviceInterupt(int interupt, gameBoy *gb) {
 
 void doInterupts(gameBoy *gb) {
   if (gb->masterAllowInterupt){
-    BYTE request = readMemory(gb->m_rom, 0xFF0F);
-    BYTE enabled = readMemory(gb->m_rom, 0xFFFF);
+    BYTE request = readMemory(gb, 0xFF0F);
+    BYTE enabled = readMemory(gb, 0xFFFF);
 
     if( request > 0) {
       for (int i = 0; i < 5; i++) {
@@ -224,13 +225,13 @@ void doInterupts(gameBoy *gb) {
 
 
 bool isLCDEnabled(gameBoy *gb) {
-  return testBit(readMemory(gb->m_rom, 0xFF40), 7);
+  return testBit(readMemory(gb, 0xFF40), 7);
 }
 
 
 void setLCDStatus(gameBoy *gb) {
 
-  BYTE status = readMemory(gb->m_rom, 0xFF41);
+  BYTE status = readMemory(gb, 0xFF41);
   if (!isLCDEnabled(gb)) {
 
 
@@ -246,7 +247,7 @@ void setLCDStatus(gameBoy *gb) {
   }
 
 
-  BYTE currentline = readMemory(gb->m_rom, 0xFF44);
+  BYTE currentline = readMemory(gb, 0xFF44);
   BYTE currentmode = status & 0x3;
 
   BYTE mode = 0;
@@ -301,7 +302,7 @@ void setLCDStatus(gameBoy *gb) {
 
   //check coincident flag
 
-  if (readMemory(gb->m_rom, 0xFF44) == readMemory(gb->m_rom, 0xFF45)) {
+  if (readMemory(gb, 0xFF44) == readMemory(gb, 0xFF45)) {
     status = bitSet(status, 2);
 
     if ( testBit(status, 6) )
@@ -327,7 +328,7 @@ int bitGetVal(BYTE targetByte, int targetBit) {
 void doDMATransfer(BYTE data, gameBoy *gb) {
   WORD address = data << 8;
   for (int i = 0; i < 0xA0; i++) {
-    writeMemory(0xFE00 + i, readMemory(gb->m_rom, address + i), gb);
+    writeMemory(0xFE00 + i, readMemory(gb, address + i), gb);
   }
 }
 

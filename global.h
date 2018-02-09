@@ -47,6 +47,7 @@ typedef struct gameBoy {
   bool MBC1;
   bool MBC2;
   BYTE currentRomBank;
+  BYTE currentRAMBank;
   BYTE screenData[160][144][3];
   int timerCount;
   int timerStartValue;
@@ -54,6 +55,8 @@ typedef struct gameBoy {
   int scanlineCounter;
   BYTE *m_rom;
   BYTE *m_cartridge;
+  BYTE *m_RAMBanks;
+
 } gameBoy;
 
 

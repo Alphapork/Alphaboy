@@ -11,17 +11,17 @@
 
 
 
-
-
-
-
-
-
 int main(int argc, char const *argv[]) {
 
   gameBoy alphaBoy;
   alphaBoy.m_cartridge = calloc(0x200000, sizeof(BYTE));
   if (alphaBoy.m_cartridge == NULL) {
+    printf("ERROR\n");
+    return -1;
+  }
+
+  alphaBoy.m_RAMBanks = calloc(0x8000, sizeof(BYTE));
+  if (alphaBoy.m_RAMBanks == NULL) {
     printf("ERROR\n");
     return -1;
   }
@@ -74,5 +74,6 @@ int main(int argc, char const *argv[]) {
 
   free(alphaBoy.m_cartridge);
   free(alphaBoy.m_rom);
+  free(alphaBoy.m_RAMBanks);
   return 0;
 }

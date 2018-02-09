@@ -8,7 +8,7 @@
 
 COLOUR getColour(BYTE colourNum, WORD address, gameBoy *gb) {
   COLOUR res = WHITE;
-  BYTE palette = readMemory(gb->m_rom, address);
+  BYTE palette = readMemory(gb, address);
   int hi = 0;
   int lo = 0;
 
@@ -43,18 +43,18 @@ void renderTiles(gameBoy *gb) {
   bool unsig = true;
 
   //where to draw the visual area and the window
-  BYTE scrollY = readMemory(gb->m_rom, 0xFF42);
-  BYTE scrollX = readMemory(gb->m_rom, 0xFF43);
-  BYTE windowY = readMemory(gb->m_rom, 0xFF4A);
-  BYTE windowX = readMemory(gb->m_rom, 0xFF4B) - 7;
-  BYTE lcdControl = readMemory(gb->m_rom, 0xFF40);
+  BYTE scrollY = readMemory(gb, 0xFF42);
+  BYTE scrollX = readMemory(gb, 0xFF43);
+  BYTE windowY = readMemory(gb, 0xFF4A);
+  BYTE windowX = readMemory(gb, 0xFF4B) - 7;
+  BYTE lcdControl = readMemory(gb, 0xFF40);
   bool usingWindow = false;
 
   //is the window enabled?
   if (testBit(lcdControl,5)) {
       //is the current scanline we're drawing
       //within the windows Y pos?
-      if (windowY <= readMemory(gb->m_rom, 0xFF44) ) {	
+      if (windowY <= readMemory(gb, 0xFF44) ) {
 	usingWindow = true;
       }
 
@@ -98,9 +98,9 @@ void renderTiles(gameBoy *gb) {
     //current scanline is drawing
 
     if (!usingWindow)
-      yPos = scrollY + readMemory(gb->m_rom, 0xFF44);
+      yPos = scrollY + readMemory(gb, 0xFF44);
     else
-      yPos = readMemory(gb->m_rom, 0xFF44) - windowY;
+      yPos = readMemory(gb, 0xFF44) - windowY;
 
 
     //which of the 8 vertical pixels of the current
@@ -127,9 +127,9 @@ void renderTiles(gameBoy *gb) {
       //or unsigned
       WORD tileAddress = backgroundMemory + tileRow + tileCol;
       if (unsig)
-	tileNum = (BYTE)readMemory(gb->m_rom,tileAddress);
+	tileNum = (BYTE)readMemory(gb,tileAddress);
       else
-	tileNum = (SIGNED_BYTE)readMemory(gb->m_rom,tileAddress);
+	tileNum = (SIGNED_BYTE)readMemory(gb,tileAddress);
 
       //deduce where this tile identifier is in memory.
       WORD tileLocation = tileData;
@@ -144,8 +144,8 @@ void renderTiles(gameBoy *gb) {
       //from memory
       BYTE line = yPos % 8;
       line *= 2; //each vertical line takes up two bytes in memory
-      BYTE data1 = readMemory(gb->m_rom, tileLocation + line);
-      BYTE data2 = readMemory(gb->m_rom, tileLocation + line + 1);
+      BYTE data1 = readMemory(gb, tileLocation + line);
+      BYTE data2 = readMemory(gb, tileLocation + line + 1);
 
       //pixel 0 in the tile is bit 7 of data1 and data2
       //Pixel 1 is bit 6 etc
@@ -157,11 +157,11 @@ void renderTiles(gameBoy *gb) {
       //in the tile
       int colourNum = bitGetVal(data2, colourBit);
       colourNum <<= 1;
-      colourNum |= bitGetVal(data1, colourBit); 
+      colourNum |= bitGetVal(data1, colourBit);
 
       //now we have the colour id get the actual
       //colour from palette 0xFF47
-      COLOUR col = getColour(colourNum, 0xFF47, gb); 
+      COLOUR col = getColour(colourNum, 0xFF47, gb);
       int red = 0;
       int green = 0;
       int blue = 0;
@@ -173,7 +173,7 @@ void renderTiles(gameBoy *gb) {
       case DARK: red = 0x77; green = 0x77; blue = 0x77; break;
       }
 
-      int finaly = readMemory(gb->m_rom,0xFF44);
+      int finaly = readMemory(gb,0xFF44);
 
       //safety check to make sure what im about
       //to set is in the 160x144 bounds
@@ -184,52 +184,52 @@ void renderTiles(gameBoy *gb) {
       gb->screenData[pixel][finaly][0] = red;
       gb->screenData[pixel][finaly][1] = green;
       gb->screenData[pixel][finaly][2] = blue;
-      
+
     }
 
-    
+
 }
 
 
 void renderSprites(gameBoy *gb) {
-  BYTE lcdControl = readMemory(gb->m_rom, 0xFF40); //TODO lcdControll -> gameBoy struct
+  BYTE lcdControl = readMemory(gb, 0xFF40); //TODO lcdControll -> gameBoy struct
   bool use8x16 = false;
   if (testBit(lcdControl,2)) {
     use8x16 = true;
   }
-  
+
   for (int sprite = 0; sprite < 40; sprite++) {
     //sprite occupies 4 bytes in the sprite attributes table
     BYTE index = sprite * 4;
-    BYTE yPos = readMemory(gb->m_rom, 0xFE00 + index) - 16;
-    BYTE xPos = readMemory(gb->m_rom, 0xFE00 + index + 1) - 8;
-    BYTE tileLocation = readMemory(gb->m_rom, 0xFE00 + index + 2);
-    BYTE attributes  = readMemory(gb->m_rom, 0xFE00 + index + 3);
-    
+    BYTE yPos = readMemory(gb, 0xFE00 + index) - 16;
+    BYTE xPos = readMemory(gb, 0xFE00 + index + 1) - 8;
+    BYTE tileLocation = readMemory(gb, 0xFE00 + index + 2);
+    BYTE attributes  = readMemory(gb, 0xFE00 + index + 3);
+
     bool yFlip = testBit(attributes,6);
     bool xFlip = testBit(attributes,5);
-    
-    int scanline = readMemory(gb->m_rom, 0xFF44);
-    
+
+    int scanline = readMemory(gb, 0xFF44);
+
     int ysize = 8;
     if (use8x16)
       ysize = 16;
-    
+
     //does this sprite intercept with the scanline?
     if ((scanline >= yPos) && (scanline < (yPos +ysize))) {
 	int line = scanline - yPos;
-	
+
 	//read the sprite in backwards in the y axis
 	if (yFlip) {
 	  line -= ysize;
 	  line *= -1;
 	}
-	
+
 	line *= 2; //same as for tiles
 	WORD dataAddress = (0x8000 + (tileLocation * 16)) + line;
-	BYTE data1 = readMemory(gb->m_rom, dataAddress);
-	BYTE data2 = readMemory(gb->m_rom, dataAddress + 1);
-	
+	BYTE data1 = readMemory(gb, dataAddress);
+	BYTE data2 = readMemory(gb, dataAddress + 1);
+
 	//its easier to read in from right to left as pixel 0 is
 	//bit 7 in the colour data, pixel 1 is bit 6 etc
 	for (int tilePixel = 7; tilePixel >= 0; tilePixel --) {
@@ -239,52 +239,52 @@ void renderSprites(gameBoy *gb) {
 	    colourbit -= 7;
 	    colourbit *= -1;
 	  }
-	  
+
 	  //the rest is the same as for tiles
 	  int colourNum = bitGetVal(data2, colourbit);
 	  colourNum <<= 1;
 	  colourNum |=bitGetVal(data1, colourbit);
-	  
+
 	  WORD colourAddress = testBit(attributes,4) ? 0xFF49:0xFF48;
 	  COLOUR col = getColour(colourNum, colourAddress, gb);
-	  
+
 	  //white is transparent for sprites.
 	  if (col == WHITE)
 	    continue;
-	  
-	  
+
+
 	  int red = 0;
 	  int green = 0;
 	  int blue = 0;
-	  
+
 	  switch(col){
 	  case WHITE: red = 255; green = 255; blue = 255; break;
 	  case LIGHT: red = 0xCC; green = 0xCC; blue = 0xCC; break;
 	  case DARK: red = 0x77; green = 0x77; blue = 0x77; break;
 	  }
-	  
+
 	  int xPix = 0 - tilePixel;
 	  xPix += 7;
-	  
+
 	  int pixel = xPos +xPix;
-	  
+
 	  //sanity check
 	  if ((scanline < 0) || (scanline >143) || (pixel < 0) || (pixel > 159)) {
 	    continue;
 	  }
-	  
+
 	  gb->screenData[pixel][scanline][0] = red;
 	  gb->screenData[pixel][scanline][1] = green;
-	  gb->screenData[pixel][scanline][2] = blue;	  
-	  
+	  gb->screenData[pixel][scanline][2] = blue;
+
 	}
       }
       }
   }
-  
+
 
 void drawScanline(gameBoy *gb) {
-  BYTE control = readMemory(gb->m_rom, 0xFF40);
+  BYTE control = readMemory(gb, 0xFF40);
   if (testBit(control,0)) {
     renderTiles(gb);
   }
@@ -300,13 +300,13 @@ void drawScanline(gameBoy *gb) {
 void updateGfx(int cycles, gameBoy *gb) {
   setLCDStatus(gb);
 
-  if (isLCDEnabled(gb)) { 
+  if (isLCDEnabled(gb)) {
     gb->scanlineCounter -= cycles;
   } else return;
 
   if (gb->scanlineCounter <= 0) {
     gb->m_rom[0xFF44]++;
-    BYTE currentScanline = readMemory(gb->m_rom, 0xFF44);
+    BYTE currentScanline = readMemory(gb, 0xFF44);
 
     gb->scanlineCounter = 456;
 

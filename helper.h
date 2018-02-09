@@ -12,7 +12,7 @@ void writeMemory(WORD address, BYTE data, gameBoy *gb);
 
 bool testBit(BYTE byteToTest, int bitNumber);
 
-BYTE readMemory(BYTE *memoryToReadFrom, WORD addressToRead);
+BYTE readMemory(gameBoy *gb, WORD addressToRead);
 
 bool isClockEnabled(gameBoy *gb);
 
