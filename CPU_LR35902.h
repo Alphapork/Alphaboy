@@ -8,8 +8,8 @@
 
 
 int performInstruction(gameBoy *gb);
-int performExtendedOp(gameBoy *gb);
-int performOp(gameBoy *gb);
+int performExtendedOp(gameBoy *gb, BYTE op);
+int performOp(gameBoy *gb, BYTE op);
 
 
 

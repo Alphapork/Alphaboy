@@ -69,6 +69,10 @@ void initGameBoy(gameBoy *gb) {
   gb->dividerRegister = 0;
   gb->scanlineCounter = 456;
 
+  for (int i = 0; i < 0x8000; i++) {
+    gb->m_rom[i] = gb->m_cartridge[i];
+  }
+
 
 }
 
@@ -130,7 +134,7 @@ void handleBanking(gameBoy *gb, WORD address, BYTE data) {
   }
 
   //do ROM bank change
-  else if ((address >= 0x200) && (address < 0x4000)) {
+  else if ((address >= 0x2000) && (address < 0x4000)) {
     if (gb->MBC1 || gb->MBC2) {
       doChangeLoROMBank(gb, data);
     }
@@ -270,7 +274,7 @@ void checkTimers(int cycles, gameBoy *gb) {
   }
 }
 
-void pushWordOnStack(gameBoy *gb) {
+void pushWordOnStack(gameBoy *gb) { //TODO
   printf("TODO pushWordOnStack\n");
 }
 
