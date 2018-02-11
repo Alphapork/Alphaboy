@@ -46,6 +46,8 @@ typedef struct gameBoy {
   bool masterAllowInterupt;
   bool MBC1;
   bool MBC2;
+  bool enableRAM;
+  bool ROMbanking;
   BYTE currentRomBank;
   BYTE currentRAMBank;
   BYTE screenData[160][144][3];

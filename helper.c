@@ -19,6 +19,8 @@ void initGameBoy(gameBoy *gb) {
   gb->masterAllowInterupt = true;
   gb->MBC1 = false;
   gb->MBC2 = false;
+  gb->enableRAM = false; //TODO
+  gb->ROMbanking = false; //TODO
   gb->currentRomBank = 1;
   gb->currentRAMBank = 0;
   gb->CPU.regA = 0x01;
@@ -70,12 +72,103 @@ void initGameBoy(gameBoy *gb) {
 
 }
 
+void doChangeROMRAMMode(gameBoy *gb, BYTE data) {
+  BYTE newData = data & 0x1;
+  gb->ROMbanking = (newData == 0)?true:false;
+  if (gb->ROMbanking) {
+    gb->currentRAMBank = 0;
+  }
+}
 
+void doRAMBankChange(gameBoy *gb, BYTE data) {
+  gb->currentRAMBank = data & 0x3;
+}
+
+void doChangeHiROMBank(gameBoy *gb, BYTE data) {
+  //turn off the upper 3 bits of the current rom
+  gb->currentRomBank &= 31;
+
+  //turn of the lower 5 bits of the data
+  data &= 224;
+  gb->currentRomBank |= data;
+  if (gb->currentRomBank == 0) gb->currentRomBank++;
+}
+
+void doChangeLoROMBank(gameBoy *gb, BYTE data) {
+  if(gb->MBC2) {
+    gb->currentRomBank = data & 0xF;
+    if (gb->currentRomBank == 0) gb->currentRomBank++;
+    return;
+  }
+
+  BYTE lower5 = data & 31;
+  gb->currentRomBank &= 224; // turn of the lower 5
+  gb->currentRomBank |= lower5;
+  if (gb->currentRomBank == 0) gb->currentRomBank++;
+}
+
+void doRamBankEnable(gameBoy *gb, WORD address, BYTE data) {
+  if (gb->MBC2) {
+    if (testBit(address, 4) == 1) return;
+  }
+
+  BYTE testData = data & 0xF;
+  if (testData == 0xA) {
+    gb->enableRAM = true;
+  }
+  else if (testData == 0x0) {
+    gb->enableRAM = false;
+  }
+}
+
+void handleBanking(gameBoy *gb, WORD address, BYTE data) {
+  //do RAM enabling
+  if (address < 0x2000) {
+    if (gb->MBC1 || gb->MBC2) {
+      doRamBankEnable(gb, address, data);
+    }
+  }
+
+  //do ROM bank change
+  else if ((address >= 0x200) && (address < 0x4000)) {
+    if (gb->MBC1 || gb->MBC2) {
+      doChangeLoROMBank(gb, data);
+    }
+  }
+
+  //do ROM or RAM bank change
+  else if ((address >= 0x4000) && (address < 0x6000)) {
+    //there is no rambank in mbc2 so always use rambank 0
+    if (gb->MBC1) {
+      if (gb->ROMbanking) {
+        doChangeHiROMBank(gb, data);
+      }
+      else {
+        doRAMBankChange(gb, data); //TODO
+      }
+    }
+  }
+
+  //this will change whether we are doing ROM banking
+  //or RAM banking with the above if statement
+  else if ((address >= 0x6000) && (address < 0x8000)) {
+    if (gb->MBC1) {
+      doChangeROMRAMMode(gb, data); //TODO
+    }
+  }
+}
 
 void writeMemory(WORD address, BYTE data, gameBoy *gb) {
   //read-only
   if ( address < 0x8000 ) {
+    handleBanking(gb, address, data); //TODO
+  }
 
+  else if ( (address >= 0xA000) && (address < 0xC000)) {
+    if (gb->enableRAM) {
+      WORD newAddress = address - 0xA000;
+      gb->m_RAMBanks[newAddress + (gb->currentRAMBank * 0x2000)] = data;
+    }
   }
   //mirror to RAM
   else if ( ( address >= 0xE000 ) && ( address < 0xFE00)) {
@@ -123,12 +216,22 @@ void writeMemory(WORD address, BYTE data, gameBoy *gb) {
 
 
 
-bool testBit(BYTE byteToTest, int bitNumber){
-  return((byteToTest >> bitNumber) & 0x01 == 0x01);
+bool testBit(WORD wordToTest, int bitNumber){
+  return((wordToTest >> bitNumber) & 0x01 == 0x01);
 }
 
-BYTE readMemory(gameBoy *gb, WORD addressToRead) {
-  return gb->m_rom[addressToRead];
+BYTE readMemory(gameBoy *gb, WORD address) {
+
+  if ((address >= 0x4000) && (address <= 0x7FFF)) {
+    WORD newAddress = address - 0x4000;
+    return gb->m_cartridge[newAddress + (gb->currentRomBank * 0x4000)];
+  }
+
+  else if ((address >= 0xA000) && (address <= 0xBFFF)) {
+    WORD newAddress = address - 0xA000;
+    return gb->m_RAMBanks[newAddress + (gb->currentRAMBank * 0x2000)];
+  }
+  return gb->m_rom[address];
 }
 
 bool isClockEnabled(gameBoy *gb) {

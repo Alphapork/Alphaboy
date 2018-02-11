@@ -8,9 +8,21 @@ void readROM(char const *file_name, BYTE *m_cartridge);
 
 void initGameBoy(gameBoy *gb);
 
+void doChangeROMRAMMode(gameBoy *gb, BYTE data);
+
+void doRAMBankChange(gameBoy *gb, BYTE data);
+
+void doChangeHiROMBank(gameBoy *gb, BYTE data);
+
+void doChangeLoROMBank(gameBoy *gb, BYTE data);
+
+void doRamBankEnable(gameBoy *gb, WORD address, BYTE data);
+
+void handleBanking(gameBoy *gb, WORD address, BYTE data);
+
 void writeMemory(WORD address, BYTE data, gameBoy *gb);
 
-bool testBit(BYTE byteToTest, int bitNumber);
+bool testBit(WORD wordToTest, int bitNumber);
 
 BYTE readMemory(gameBoy *gb, WORD addressToRead);
 
